@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>    
+    <title>My ToDo App</title>
+</head>
+
+<body>
+    <input id="todo-input" type="text"/>
+    <input id="date-picker" type="date">
+    <button onclick="addTask()">Add Task</button>
+    <div id="todo-list"></div>
+    <script>
+        //------------------------------MODEL--------------------------------
+        //existing to-do tasks
+        let todoTasks;
+        const savedTodos = JSON.parse(localStorage.getItem('todo'));    //retrive the local storage
+        if(Array.isArray(savedTodos)){
+            todoTasks = savedTodos
+        } else{
+            todoTasks = [{
+                title : 'Get groceries',
+                dueDate : '2022-05-30',
+                id : 'id1'
+            },{
+                title : 'Wash car',
+                dueDate : '2022-06-05',
+                id : 'id2'
+            },{
+                title : 'Do Homework',
+                dueDate : '2022-06-05',
+                id : 'id3'
+            },{
+                title : 'Clean Room',
+                dueDate : '2022-06-10',
+                id : 'id4'
+            },{
+                title : 'Make Dinner',
+                dueDate : '2022-06-15',
+                id : 'id5'
+            }];
+        }
+
+        //create todo
+        function createToDo(inputTask, dueDate){
+            const id = '' + new Date().getTime();                   //converting to string to remove type error caused when comparing it to string ids.
+            todoTasks.push({
+                title : inputTask,
+                dueDate : dueDate,
+                id : id
+            });
+            saveTodos();
+        }
+        
+        //delete todo
+        function deleteToDo(idToDelete){
+            todoTasks = todoTasks.filter(function(todoTask){
+                if(todoTask.id === idToDelete){
+                    return false;
+                } else{
+                    return true;
+                }
+            });   
+            saveTodos();
+        }
+
+        function saveTodos(){
+            localStorage.setItem('todo', JSON.stringify(todoTasks))
+        }
+        
+        //-----------------------------CONTROLLER---------------------------------
+        
+        //function to add tasks on clicking the button
+        function addTask(){
+            const textbox = document.getElementById('todo-input');  //getting input value from html element with given id
+            const inputTask = textbox.value;
+
+            const datePicker = document.getElementById('date-picker');
+            const dueDate = datePicker.value;
+            
+            createToDo(inputTask, dueDate);
+            render();
+        }
+
+        //function to delete Tasks
+        function deleteTask(event){
+            console.log(event);
+            const idToDelete = event.target.id;
+            deleteToDo(idToDelete);            
+            render();
+        }
+        
+        //----------------------------------VIEW------------------------------------
+        //function to render the list
+        function render(){
+            document.getElementById('todo-list').innerHTML = '';   // wiping out old list
+
+            todoTasks.forEach(function (todoTask){                
+                const element = document.createElement('div');     //creating a div to add tasks
+                element.innerText = todoTask.title + ' ::: ' + todoTask.dueDate ;
+
+                const todoList = document.getElementById('todo-list');
+                todoList.appendChild(element);                   //appending the created div within todo list div to make it possible to wipe out.
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerText = 'Delete';   
+                deleteButton.style = 'margin-left: 15px'             //styling with javascript          
+                deleteButton.id = todoTask.id;   
+                deleteButton.onclick = deleteTask;
+                element.append(deleteButton);                          //adding delete button to tasks.
+                
+
+            });    
+        }
+        render();
+        
+          //DOM-- Document Object Model -- Using html elements in javascript as objects to use seamlessly. html attributes can be used as object attributes as well.
+
+          
+          /*MVC Architecture -- MODEL -- contains all the code that saves and  manages data.
+                                VIEW -- contains all the code that manages visuals. Renders visuals using data 
+                                        in the model.
+                                CONTROLLER -- connects model and view together.
+                                              -- responds to events from the view (e.g. button clicks)
+                                              -- tells the model to update its data (and re-rendering of the view)
+                                */
+    </script>    
+</body>
+</html>
